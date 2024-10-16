@@ -86,9 +86,3 @@ def update_index():
 def chat_with_bot(query_engine, question):
     response_stream = query_engine.stream_chat(question)
     return response_stream
-
-query_engine = initialize_conversation_bot()
-response = chat_with_bot(query_engine, question:=input("You: "))
-for token in response.response_gen:
-    print(token, end="")
-del response, query_engine

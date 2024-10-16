@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with EttA (beta)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ timestamp }}">
+</head>
+<body>
+    <div class="container">
+        <div class="chatbox">
+            <div class="chatbox__messages" id="message-container">
+                <!-- Messages will be dynamically added here -->
+            </div>
+            <form id="message-form">
+                <div class="input-container">
+                    <input type="text" id="question-input" name="question" placeholder="Ask a question...">
+                    <input type="file" id="file-input" accept=".md,.pdf,.doc,.docx,.ppt,.pptx" style="display: none;">
+                    <label for="file-input" id="file-btn"><i class="fas fa-plus"></i></label>
+                    <button type="submit" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const messageContainer = document.getElementById('message-container');
+        const messageForm = document.getElementById('message-form');
+        const questionInput = document.getElementById('question-input');
+        const fileInput = document.getElementById('file-input');
+        const fileBtn = document.getElementById('file-btn');
+
+        function appendMessage(message, className, iconClass) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', className);
+            messageElement.innerHTML = `<div class="message-content">
+                                            <div class="message-icon"><i class="${iconClass}"></i></div>
+                                            <div>${message}</div>
+                                        </div>`;
+            messageContainer.appendChild(messageElement);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            appendMessage(question, 'user-message', 'fas fa-user');
+            questionInput.value = '';
+
+            const responseContainer = document.createElement('div');
+            responseContainer.classList.add('message', 'assistant-message');
+            messageContainer.appendChild(responseContainer);
+
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `question=${encodeURIComponent(question)}`,
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let partialResponse = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                partialResponse += decoder.decode(value, { stream: true });
+                const formattedResponse = partialResponse.replace(/assistant/g, 'Etta');
+                responseContainer.innerHTML = `<div class="message-icon"><i class="fas fa-robot"></i></div><div class="message-content">${formattedResponse.replace(/\n/g, '<br>')}</div>`;
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+        }
+
+        async function uploadFile(file) {
+            appendMessage(`I am uploading ${file.name}`, 'user-message', 'fas fa-user');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const responseContainer = document.createElement('div');
+            responseContainer.classList.add('message', 'assistant-message');
+            messageContainer.appendChild(responseContainer);
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const filename = file.name;
+                responseContainer.innerHTML = `<div class="message-icon"><i class="fas fa-robot"></i></div><div class="message-content">I have finished learning ${filename}, How may I assist you?</div>`;
+            } else {
+                const errorMessage = await response.text();
+                responseContainer.innerHTML = `<div class="message-icon"><i class="fas fa-robot"></i></div><div class="message-content">Error: ${errorMessage}</div>`;
+            }
+
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                uploadFile(file);
+            }
+        });
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            askQuestion();
+        });
+
+        fileBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+        });
+    </script>
+</body>
+</html>

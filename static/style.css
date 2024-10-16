@@ -1,0 +1,118 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.chatbox {
+    width: 90%;
+    max-width: 800px; /* Adjust as needed */
+    height: 90vh; /* Adjust as needed */
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 0 30px #eee;
+    font-size: 17px;
+}
+
+.chatbox__messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.message {
+    position: relative;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.message-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.user-icon img,
+.assistant-icon img {
+    position: absolute;
+    top: -5px;
+    left: -30px;
+    font-size: 20px;
+    color: #ccc;
+}
+
+
+.user-message {
+    align-self: flex-end;
+    background-color: #0084ff;
+    color: white;
+    border-bottom-right-radius: 0;
+}
+
+    .user-message > .message-content {
+        max-width: 70%;
+        word-wrap: break-word;
+        padding-left: 20px;
+    }
+
+.assistant-message {
+    align-self: flex-start;
+    background-color: #00C853;
+    color: white;
+    border-bottom-left-radius: 0;
+}
+
+    .assistant-message > .message-content {
+        max-width: 70%;
+        word-wrap: break-word;
+        padding-left: 20px;
+    }
+
+.input-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+#question-input {
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    flex: 1;
+}
+
+#file-btn, #send-btn {
+    padding: 15px 20px;
+    font-size: 1.2em;
+}
+
+#file-btn {
+    cursor: pointer;
+}
+
+#send-btn {
+    background-color: rgb(0, 196, 65);
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.23s;
+}
+
+    #send-btn:hover {
+        background-color: #0056b3;
+    }
